@@ -4,6 +4,7 @@ import com.eunsoogi.util.GCUtil;
 import com.eunsoogi.util.GCInfo;
 import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonGenerator;
+import com.google.gson.Gson;
 import org.json.simple.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -64,6 +65,22 @@ public class JsonPerfTest {
         // 2. Jackson JsonGenerator 테스트
         logger.info("2. Jackson JsonGenerator 성능 테스트 시작");
         testJacksonPerf();
+
+        // 잠시 대기 (GC 정리를 위해)
+        try {
+            logger.info("테스트 간 대기 중... (GC 정리)");
+            Thread.sleep(5000);
+            System.gc();
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+
+        logger.info(createSeparator(80));
+
+        // 3. Gson 테스트
+        logger.info("3. Gson 성능 테스트 시작");
+        testGsonPerf();
 
         logger.info("=== 테스트 완료 ===");
     }
@@ -169,6 +186,34 @@ public class JsonPerfTest {
             generator.close();
 
             String jsonString = writer.toString();
+
+            // 결과 검증 (간단히 길이만 확인)
+            if (jsonString.length() > 0) {
+                counters[0].incrementAndGet(); // successCount
+            } else {
+                counters[1].incrementAndGet(); // errorCount
+            }
+        });
+    }
+
+    /**
+     * Gson 성능 테스트
+     */
+    private static void testGsonPerf() {
+        runJsonPerfTest("Gson", (counters, requestId) -> {
+            // Gson 객체 생성 (각 요청마다 새로 생성)
+            Gson gson = new Gson();
+
+            // Map을 사용하여 JSON 객체 생성
+            java.util.Map<String, String> jsonMap = new java.util.HashMap<>();
+
+            // 다수의 필드 추가
+            for (int i = 0; i < fieldCount; i++) {
+                jsonMap.put("field" + i, "value" + i + "_" + requestId);
+            }
+
+            // JSON 문자열 생성
+            String jsonString = gson.toJson(jsonMap);
 
             // 결과 검증 (간단히 길이만 확인)
             if (jsonString.length() > 0) {
