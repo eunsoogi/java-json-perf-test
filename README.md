@@ -12,24 +12,6 @@ JSONObject와 Jackson JsonGenerator의 성능을 비교하는 Maven 기반 테�
    - GC 소요 시간
    - 각 구간별 처리 시간
 
-## 🚀 주요 최적화 내용
-
-### 1. 객체 재사용 최적화
-- **JSONObject 최적화**: ThreadLocal을 사용한 JSONObject 재사용
-- **Jackson 최적화**: ThreadLocal을 사용한 StringWriter 재사용
-- **GC 압박 감소**: 메모리 할당 오버헤드 최소화
-
-### 2. 코드 리팩토링
-- **JsonTask 함수형 인터페이스** 도입
-- **runJsonPerfTest() 공통 프레임워크** 생성
-- **중복 코드 제거**: 약 200줄 → 50줄로 축소
-- **유지보수성 향상**: 일관된 테스트 프레임워크
-
-### 3. 성능 개선 결과
-- **JSONObject**: 약 30배 성능 개선 (43 TPS → 1,275 TPS)
-- **Jackson**: 약 23배 성능 개선 (2,100 TPS → 49,090 TPS)
-- **최대 성능 모드**: TPS 제한 없이 최대 처리량 측정
-
 ## 🚀 실행 방법
 
 ### 사전 요구사항
@@ -100,7 +82,6 @@ export JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk1.8.0_74.jdk/Contents/Home
 }
 ```
 
-- **테스트 모드**: 최대 성능 모드 (TPS 제한 없음)
 - **기본 테스트 시간**: 10초
 - **기본 스레드 수**: 5개
 - **로깅**: SLF4J + Logback (콘솔 + 파일)
@@ -167,7 +148,7 @@ java-json-perf-test/
 - **실시간 처리 현황**: 1초마다 현재 TPS 및 평균 TPS 출력
 - **최종 성능 결과**: 전체 TPS, 총 처리 건수, 테스트 시간
 - **GC 발생 횟수 및 소요 시간**: Young GC/Full GC 통계
-- **로그 파일**: `json-performance-test.log`
+- **로그 파일**: `output.log`
 
 ### 출력 예시
 ```
